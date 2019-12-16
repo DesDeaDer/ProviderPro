@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Object = UnityEngine.Object;
 
@@ -25,10 +24,7 @@ public partial class ResourcesDictionaryDrawer
             };
         }
 
-        static private bool IsValueValid(Object value)
-        {
-            return value != null;
-        }
+        static private bool IsValueValid(Object value) => value != null;
 
         static private bool IsValidKey(IEnumerable<string> keys, string key, int index)
         {
@@ -60,7 +56,7 @@ public partial class ResourcesDictionaryDrawer
                 string.IsNullOrEmpty(key)
                 ||
                 (
-                    !Char.IsLetter(key[0])
+                    !char.IsLetter(key[0])
                     && key[0] != '_'
                 )
                 ||
@@ -76,7 +72,7 @@ public partial class ResourcesDictionaryDrawer
 
             foreach (var ch in key)
             {
-                if (!(Char.IsLetterOrDigit(ch) || ch == '_'))
+                if (!(char.IsLetterOrDigit(ch) || ch == '_'))
                 {
                     return false;
                 }

@@ -10,20 +10,27 @@ using Object = UnityEngine.Object;
 [CustomEditor(typeof(ResourcesProviderBase<,>), true)]
 public partial class ResourcesDictionaryDrawer : Editor
 {
+
+    #region Data
+#pragma warning disable 0649
+
     [SerializeField] private Texture _addItemImage;
     [SerializeField] private Texture _dublicateItemImage;
     [SerializeField] private Texture _removeItemImage;
     [SerializeField] private Texture _viewItemImage;
 
-    private const string PATH_PROPERTY_DATA = "_values";
+#pragma warning restore 0649
+    #endregion
+
     private const int ITEM_HEIGHT = 20;
     private const int BUTTON_HEIGHT = ITEM_HEIGHT + 1;
     private const int BUTTON_WIDTH = ITEM_HEIGHT + 1;
 
-    private const string PATH_FOLDER_RESOURCES = "Resources/";
+    static private readonly string PATH_PROPERTY_DATA = "_values";
+    static private readonly string PATH_FOLDER_RESOURCES = "Resources/";
 
     private readonly Color COLOR_BUTTON_ACTIVE = new Color(0.80f, 1.00f, 0.80f);
-    private readonly Color COLOR_BUTTON_DEACTIVE = new Color(0.70f, 0.67f, 0.67f);
+    private readonly Color COLOR_BUTTON_DEACTIVE = new Color(0.77f, 0.71f, 0.71f);
 
     static private readonly GUILayoutOption _buttonWidthOption = GUILayout.Width(BUTTON_WIDTH);
     static private readonly GUILayoutOption _buttonHeightOption = GUILayout.Height(BUTTON_HEIGHT);
@@ -32,37 +39,32 @@ public partial class ResourcesDictionaryDrawer : Editor
     public bool IsChanged { get; private set; }
     public bool IsItemsValid { get; private set; }
 
-    private void SetChanged()
-    {
-        IsChanged = true;
-    }
-
-    private void SetUnchanged()
-    {
-        IsChanged = false;
-    }
+    private void SetChanged() => IsChanged = true;
+    private void SetUnchanged() => IsChanged = false;
+    private void Activate() => IsActivated = TryGetInitialize(target.GetType(), out _itemsProperty, out _items, out _keyType, out _valueType);
+    private void Deactivate() => IsActivated = false;
 
     private Type _keyType;
     private Type _valueType;
     private SerializedProperty _itemsProperty;
     private IList<Item> _items;
 
-    protected bool IsInitialized { get; private set; }
+    protected bool IsActivated { get; private set; }
     public Color Color { get; private set; }
 
     private void OnEnable()
     {
-        IsInitialized = TryGetInitialize(target.GetType(), out _itemsProperty, out _items, out _keyType, out _valueType);
+        Activate();
     }
 
     private void OnDisable()
     {
-        IsInitialized = false;
+        Deactivate();
     }
 
     public override void OnInspectorGUI()
     {
-        if (IsInitialized)
+        if (IsActivated)
         {
             DrawProccesing(_itemsProperty, _items, _keyType, _valueType);
         }
@@ -73,9 +75,7 @@ public partial class ResourcesDictionaryDrawer : Editor
         var arrayPropertyResult = serializedObject.FindProperty(PATH_PROPERTY_DATA);
         if (arrayPropertyResult != null)
         {
-            Type keyTypeResult;
-            Type valueTypeResult;
-            if (TryGetKeyValueType(target.GetType(), out keyTypeResult, out valueTypeResult))
+            if (TryGetKeyValueType(target.GetType(), out var keyTypeResult, out var valueTypeResult))
             {
                 var keys = keyTypeResult.GetEnumNames();
                 var itemsResult = new List<Item>(arrayPropertyResult.arraySize);
@@ -108,9 +108,6 @@ public partial class ResourcesDictionaryDrawer : Editor
 
     static private bool TryGetKeyValueType(Type type, out Type keyType, out Type valueType)
     {
-        keyType = null;
-        valueType = null;
-
         try
         {
             var typeComliteGeneric = type;
@@ -133,14 +130,14 @@ public partial class ResourcesDictionaryDrawer : Editor
         }
         catch (Exception)
         {
+            keyType = null;
+            valueType = null;
+
             return false;
         }
     }
 
-    static private Object GetObjectRef(Type valueType, SerializedProperty itemProperty)
-    {
-        return Resources.Load(itemProperty.stringValue, valueType);
-    }
+    static private Object GetObjectRef(Type valueType, SerializedProperty itemProperty) => Resources.Load(itemProperty.stringValue, valueType);
 
     static private string GetKeyFromIndex(string[] keys, int i)
     {
@@ -178,13 +175,13 @@ public partial class ResourcesDictionaryDrawer : Editor
     private void ProccesingPanelItems(IList<Item> items, Type valueType, params GUILayoutOption[] options)
     {
         var isItemsValid = true;
-
         var index = 0;
 
+        ItemToolsResult itemToolsResult;
         ValidatorResult validatorResult;
         DrawOptionsResult drawOptionsResult;
-        ItemToolsResult itemToolsResult;
         Item itemResult;
+
         foreach (var item in items)
         {
             validatorResult = ItemValidator.GetResult(items, item, index);
@@ -353,14 +350,12 @@ public partial class ResourcesDictionaryDrawer : Editor
         if (obj != null)
         {
             var path = AssetDatabase.GetAssetPath(obj);
-
             var lengthExtension = Path.GetExtension(path).Length;
             var indexStart = path.IndexOf(PATH_FOLDER_RESOURCES);
 
             if (indexStart >= 0)
             {
                 indexStart += PATH_FOLDER_RESOURCES.Length;
-
                 path = path.Substring(indexStart, path.Length - indexStart - lengthExtension);
 
                 return path;
@@ -391,5 +386,4 @@ public partial class ResourcesDictionaryDrawer : Editor
 
         return COLOR_BUTTON_DEACTIVE;
     }
-
 }

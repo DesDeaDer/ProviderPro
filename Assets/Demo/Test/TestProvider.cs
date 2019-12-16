@@ -4,8 +4,5 @@ using UnityEngine;
 namespace Demo.Test
 {
     [CreateAssetMenu(menuName = "Providers/Test")]
-    public class TestProvider : ResourcesProviderBase<TestProviderID, GameObject>
-    {
-
-    }
+    public class TestProvider : ResourcesProviderBase<TestProviderID, GameObject> { }
 }

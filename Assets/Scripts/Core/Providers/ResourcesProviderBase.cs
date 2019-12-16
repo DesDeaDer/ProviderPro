@@ -3,7 +3,6 @@ using Object = UnityEngine.Object;
 
 namespace Core.Providers
 {
-
     /// <summary>
     /// The resource provider class from the "Resources" folder
     /// </summary>
@@ -16,7 +15,9 @@ namespace Core.Providers
 
         #region Data
 #pragma warning disable 0649
+
         [SerializeField] private string[] _values;
+
 #pragma warning restore 0649
         #endregion
 
@@ -24,10 +25,9 @@ namespace Core.Providers
         {
             get
             {
-                var index = (int)(object)key;
-                --index; //key with value 0 is "None"
-
-                return Resources.Load<TValue>(_values[index]);
+                var index = (int)(object)key - 1; //key with value 0 is "None"
+                var path = _values[index];
+                return Resources.Load<TValue>(path);
             }
         }
     }

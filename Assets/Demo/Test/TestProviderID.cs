@@ -7,9 +7,8 @@ namespace Demo.Test
         None = 0,
         
         Cube = 1,
-        Cube1 = 2,
-        Image = 3,
-        Cube2 = 4,
+        Image = 2,
+        Cube2 = 3,
     
     }
 }
